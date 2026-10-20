@@ -1,0 +1,32 @@
+/dts-v1/;
+/plugin/;
+/ {
+    fragment@0 {
+        target-path = "/soc@0";
+        __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+            aynthor_tme_qmp: mailbox-tme {
+                compatible = "aynthor,tme-qmp";
+                qcom,remote-pid = <14>;
+                reg = <0 0x40800c 0 4>;
+                reg-names = "irq-reg-base";
+                qcom,irq-mask = <0x170000>;
+                mboxes = <&ipcc 23 0>;
+                mbox-names = "tme_qmp";
+                interrupt-parent = <&ipcc>;
+                interrupts = <23 0 1>;
+                label = "tme";
+                qcom,early-boot;
+                priority = <0>;
+                mbox-desc-offset = <0>;
+                #mbox-cells = <1>;
+            };
+            aynthor-tme-client {
+                compatible = "qcom,tmecom-qmp-client";
+                mboxes = <&aynthor_tme_qmp 0>;
+                mbox-names = "tmecom";
+            };
+        };
+    };
+};
