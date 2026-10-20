@@ -135,7 +135,7 @@ int tmecom_process_request(const void *reqbuf, size_t reqsize, void *respbuf,
 		goto err_exit;
 	}
 
-	dev_info(tdev->dev, "response received\n");
+	dev_dbg(tdev->dev, "response received\n");
 
 	pr_debug("tmecom received size = %u\n", tdev->pkt.size);
 	
