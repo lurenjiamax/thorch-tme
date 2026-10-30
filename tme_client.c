@@ -106,7 +106,9 @@ int tmecom_process_request(const void *reqbuf, size_t reqsize, void *respbuf,
 		return -EINVAL;
 	}
 
+	dev_dbg(tdev->dev, "PMDIAG tme request lock begin\n");
 	mutex_lock(&tdev->lock);
+	dev_dbg(tdev->dev, "PMDIAG tme request lock end\n");
 
 	tdev->rx_done = false;
 	tdev->pkt.size = tmecom_encode(tdev, reqbuf, reqsize);
@@ -119,14 +121,17 @@ int tmecom_process_request(const void *reqbuf, size_t reqsize, void *respbuf,
 	pr_debug("tmecom encoded request size = %u\n", tdev->pkt.size);
 	
 
+	dev_dbg(tdev->dev, "PMDIAG tme mailbox-send begin\n");
 	if (mbox_send_message(tdev->chan, &tdev->pkt) < 0) {
 		dev_err(tdev->dev, "failed to send qmp message\n");
 		ret = -EAGAIN;
 		goto err_exit;
 	}
 
+	dev_dbg(tdev->dev, "PMDIAG tme mailbox-send end; response-wait begin\n");
 	time_left = wait_event_interruptible_timeout(tdev->waitq,
 			tmecom_check_rx_done(tdev), msecs_to_jiffies(tdev->cl.tx_tout));
+	dev_dbg(tdev->dev, "PMDIAG tme response-wait end remaining=%ld\n", time_left);
 
 	if (time_left < 0) { ret = time_left; goto err_exit; }
 	if (!time_left) {
@@ -149,13 +154,17 @@ int tmecom_process_request(const void *reqbuf, size_t reqsize, void *respbuf,
 	if (tdev->pkt.size - TMECOM_RX_HDR_SIZE > *respsize) {
 		ret = -EMSGSIZE; goto err_exit;
 	}
+	dev_dbg(tdev->dev, "PMDIAG tme response-decode begin\n");
 	*respsize = tmecom_decode(tdev, respbuf);
+	dev_dbg(tdev->dev, "PMDIAG tme response-decode end\n");
 
 	tdev->rx_done = false;
 	ret = 0;
 
 err_exit:
+	dev_dbg(tdev->dev, "PMDIAG tme request unlock begin ret=%d\n", ret);
 	mutex_unlock(&tdev->lock);
+	dev_dbg(tdev->dev, "PMDIAG tme request end ret=%d\n", ret);
 	return ret;
 }
 EXPORT_SYMBOL(tmecom_process_request);
