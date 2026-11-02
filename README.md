@@ -8,6 +8,11 @@ Build through `../scripts/build-tme-modules.py`. The builder does not download,
 generate or rewrite C/header source. Kbuild uses a separate module output
 directory (`../build/tme-modules`) via MO. The overlay DTS is maintained here.
 
+`packaging/PKGBUILD` installs the maintained module sources and `dkms.conf`.
+DKMS rebuilds all three modules for installed kernels with matching headers;
+the module package no longer depends on one exact kernel package revision.
+The firmware overlay is installed independently of the kernel release.
+
 Local changes include Android-to-mainline API adaptation, bounded response
 handling, and debug-level successful-response logging. Full system suspend,
 charging stability and recovery after a real DSP restart remain unverified.

@@ -1,0 +1,23 @@
+pkgname=thorch-tme-modules
+pkgver=7.1.2
+pkgrel=42
+pkgdesc='Thor SM8550 TME transport modules rebuilt automatically with DKMS'
+arch=(aarch64)
+url='https://github.com/lurenjiamax/thorch-tme'
+license=(GPL-2.0-only)
+depends=(linux-thorch linux-thorch-headers dkms kmod)
+makedepends=(dtc)
+options=('!strip' '!debug')
+
+package() {
+  local root="${THORCH_TME_SOURCE_DIR:-${startdir}/..}" file
+  local dest="$pkgdir/usr/src/thorch-tme-$pkgver"
+  install -d "$dest/include"
+  for file in "$root"/*.c "$root"/*.h "$root/Makefile" "$root/dkms.conf"; do
+    install -m644 "$file" "$dest/"
+  done
+  cp -a "$root/include/." "$dest/include/"
+  install -d "$pkgdir/usr/lib/firmware/aynthor"
+  dtc -@ -I dts -O dtb -o "$pkgdir/usr/lib/firmware/aynthor/tme-overlay.dtbo" "$root/tme-overlay.dts"
+  install -Dm644 "$root/PROVENANCE" "$pkgdir/usr/share/doc/$pkgname/PROVENANCE"
+}
